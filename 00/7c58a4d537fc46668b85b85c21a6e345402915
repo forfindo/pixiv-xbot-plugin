@@ -1,0 +1,14 @@
+src/commands/cookie.ts
+  h_7037025082b470 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "007c58a4d537fc46668b85b85c21a6e345402915",
+  "prompts": {},
+  "humans": {
+    "h_7037025082b470": {
+      "author": "forfindo <3530766280@qq.com>"
+    }
+  }
+}
