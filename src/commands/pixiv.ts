@@ -6,7 +6,7 @@ import type { PixivConfig, PixivManifest } from '../types/index.js';
 export const pixivCommand: Command<PixivManifest> = {
   name: 'pixiv',
   pattern: /^(?:pixiv|p站)\s*/i,
-  priority: 100,
+  priority: 10,
   async execute(input, ctx) {
     const keyword = input.trim();
     if (!keyword) {
