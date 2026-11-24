@@ -17,7 +17,7 @@ function maskCookie(cookie: string): string {
 export const pixivCookieCommand: Command<PixivManifest> = {
   name: 'pixiv-ck',
   pattern: /^(?:pixiv|p站)\s+ck\s*/i,
-  priority: 90,
+  priority: 9,
   async execute(input, ctx) {
     const config = ctx.state.pixivConfig as PixivConfig;
     const text = input.trim();
