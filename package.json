@@ -1,0 +1,30 @@
+{
+  "name": "pixiv-xbot-plugin",
+  "version": "1.0.0",
+  "description": "根据关键词搜索 Pixiv 图片的 xopenbot 插件",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "vitest run --exclude 'test/live/**'",
+    "test:live": "vitest run test/live"
+  },
+  "keywords": [
+    "xopenbot",
+    "plugin",
+    "pixiv"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.30.3",
+  "dependencies": {
+    "@xopenbot/onebot": "0.0.4",
+    "@xopenbot/plugin": "0.0.7",
+    "https-proxy-agent": "9.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.1"
+  }
+}
