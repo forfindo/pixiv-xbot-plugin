@@ -1,10 +1,9 @@
-import { resolve } from 'node:path';
 import { definePlugin } from '@xopenbot/plugin';
 import { commands } from './commands/index.js';
 import { loadCookie } from './services/cookie-store.js';
 import type { PixivConfig } from './types/index.js';
 
-export const pixivPlugin = definePlugin({
+export const pixivPlugin = definePlugin<PixivConfig>()({
   info: {
     name: 'pixiv',
     version: '1.0.0',
@@ -13,15 +12,9 @@ export const pixivPlugin = definePlugin({
       depsOn: {},
     },
   },
-  async init(ctx) {
-    const config = {
-      proxy: 'http://127.0.0.1:7890',
-      cookie: '',
-      cacheDir: resolve('data/pixiv'),
-    } satisfies PixivConfig;
-
+  async init({state, config}) {
     await loadCookie(config);
-    ctx.state.pixivConfig = config;
+    state.pixivConfig = config;
     return {};
   },
   loadCommand() {

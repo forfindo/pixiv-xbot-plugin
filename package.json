@@ -19,7 +19,7 @@
   "packageManager": "pnpm@10.30.3",
   "dependencies": {
     "@xopenbot/onebot": "0.0.4",
-    "@xopenbot/plugin": "0.0.7",
+    "@xopenbot/plugin": "1.0.0",
     "https-proxy-agent": "9.1.0"
   },
   "devDependencies": {

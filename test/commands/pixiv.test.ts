@@ -20,11 +20,13 @@ import { downloadImage, requestJson } from '../../src/infra/http.js';
 import { searchPageCache } from '../../src/services/search-page-cache.js';
 import type { PixivConfig } from '../../src/types/index.js';
 
+const command = pixivCommand[0]!;
 const requestJsonMock = vi.mocked(requestJson);
 const downloadImageMock = vi.mocked(downloadImage);
 const randomIntMock = randomInt as unknown as Mock;
 
-type ExecCtx = Parameters<typeof pixivCommand.execute>[1];
+type ExecCtx = Parameters<typeof command.execute>[1];
+type ExecArgs = Parameters<typeof command.execute>[2];
 
 const searchBody = {
   illustManga: {
@@ -59,6 +61,15 @@ let dir: string;
 let config: PixivConfig;
 
 const createCtx = (): ExecCtx => ({ state: { pixivConfig: config } }) as unknown as ExecCtx;
+
+function execute(keyword: string) {
+  const value = keyword.trim();
+  const args = {
+    _: ['pixiv'],
+    keyword: value ? value.split(/\s+/) : [],
+  } as unknown as ExecArgs;
+  return command.execute(`pixiv${value ? ` ${value}` : ''}`, createCtx(), args);
+}
 
 function searchPaths(): string[] {
   return requestJsonMock.mock.calls
@@ -115,7 +126,7 @@ afterEach(async () => {
 
 describe('pixivCommand.execute', () => {
   it('没有关键词时返回用法提示且不请求网络', async () => {
-    const result = await pixivCommand.execute('  ', createCtx());
+    const result = await execute('  ');
 
     expect(result?.content).toEqual([
       { type: 'text', text: '用法：pixiv <关键词>，例如 pixiv 原神' },
@@ -125,7 +136,7 @@ describe('pixivCommand.execute', () => {
   });
 
   it('搜索成功后随机页下载图片并按 ID + 索引缓存，返回本地路径', async () => {
-    const result = await pixivCommand.execute('雷米埃尔', createCtx());
+    const result = await execute('雷米埃尔');
 
     expect(requestJsonMock).toHaveBeenCalledWith(
       expect.stringContaining('/ajax/search/artworks/'),
@@ -155,7 +166,7 @@ describe('pixivCommand.execute', () => {
     const cachedPath = join(dir, '123_1.png');
     await writeFile(cachedPath, 'cached-bytes');
 
-    const result = await pixivCommand.execute('原神', createCtx());
+    const result = await execute('原神');
 
     expect(requestJsonMock).toHaveBeenCalledTimes(1);
     expect(requestJsonMock).toHaveBeenCalledWith(
@@ -169,11 +180,11 @@ describe('pixivCommand.execute', () => {
   it('首次请求第 1 页并缓存最大页码，之后随机请求缓存中的一页', async () => {
     useSearchBodyWithLastPage(5);
 
-    await pixivCommand.execute('缓存页码', createCtx());
+    await execute('缓存页码');
     expect(searchPaths()).toHaveLength(1);
     expect(pageOf(searchPaths()[0] as string)).toBe('1');
 
-    await pixivCommand.execute('缓存页码', createCtx());
+    await execute('缓存页码');
     expect(searchPaths()).toHaveLength(2);
     expect(pageOf(searchPaths()[1] as string)).toBe('2');
   });
@@ -181,8 +192,8 @@ describe('pixivCommand.execute', () => {
   it('不同关键词各自缓存', async () => {
     useSearchBodyWithLastPage(5);
 
-    await pixivCommand.execute('关键词A', createCtx());
-    await pixivCommand.execute('关键词B', createCtx());
+    await execute('关键词A');
+    await execute('关键词B');
 
     const paths = searchPaths();
     expect(paths).toHaveLength(2);
@@ -205,8 +216,8 @@ describe('pixivCommand.execute', () => {
       throw new Error(`unexpected path: ${path}`);
     });
 
-    await pixivCommand.execute('过期页码', createCtx());
-    await pixivCommand.execute('过期页码', createCtx());
+    await execute('过期页码');
+    await execute('过期页码');
 
     expect(searchPaths().map((path) => pageOf(path))).toEqual(['1', '2', '1']);
   });
@@ -214,7 +225,7 @@ describe('pixivCommand.execute', () => {
   it('搜索失败时返回错误文本', async () => {
     requestJsonMock.mockRejectedValue(new Error('网络错误'));
 
-    const result = await pixivCommand.execute('原神', createCtx());
+    const result = await execute('原神');
 
     expect(result?.content).toEqual([{ type: 'text', text: 'Pixiv 搜索失败：网络错误' }]);
     expect(downloadImageMock).not.toHaveBeenCalled();

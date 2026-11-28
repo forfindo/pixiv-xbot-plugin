@@ -1,18 +1,20 @@
-import type { Command } from '@xopenbot/plugin';
+import { defineCommand } from '@xopenbot/plugin';
 import { ensureLocalImage } from '../services/image-cache.js';
 import { searchRandomPixivImage } from '../services/pixiv-search.js';
 import type { PixivConfig, PixivManifest } from '../types/index.js';
 
-export const pixivCommand: Command<PixivManifest> = {
-  name: 'pixiv',
-  pattern: /^(?:pixiv|p站)\s*/i,
-  priority: 10,
-  async execute(input, ctx) {
-    const keyword = input.trim();
+const USAGE = '用法：pixiv <关键词>，例如 pixiv 原神';
+
+export const pixivCommand = defineCommand<PixivManifest>(
+  'pixiv [keyword...]',
+  '根据关键词搜索 Pixiv 图片',
+)
+  .alias('p站')
+  .priority(10)
+  .handler(async (_input, ctx, args) => {
+    const keyword = ((args.keyword as string[] | undefined) ?? []).join(' ').trim();
     if (!keyword) {
-      return {
-        content: [{ type: 'text', text: '用法：pixiv <关键词>，例如 pixiv 原神' }],
-      };
+      return { content: [{ type: 'text', text: USAGE }] };
     }
 
     const config = ctx.state.pixivConfig as PixivConfig;
@@ -32,9 +34,8 @@ export const pixivCommand: Command<PixivManifest> = {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      return {
-        content: [{ type: 'text', text: `Pixiv 搜索失败：${message}` }],
-      };
+      return { content: [{ type: 'text', text: `Pixiv 搜索失败：${message}` }] };
     }
-  },
-};
+  })
+  .help()
+  .build();
